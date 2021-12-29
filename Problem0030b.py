@@ -45,7 +45,7 @@ class Cave():
     def add_to_open_list(self, x, y):
         if 0 <= x < self.width and 0 <= y < self.height:
             chiton = self.matrix[y][x]
-            if chiton not in self.closed_list and chiton not in self.closed_list:
+            if chiton not in self.open_list and chiton not in self.closed_list:
                 self.open_list.add(chiton)
 
     def update_distance(self, chiton, x, y):
@@ -55,7 +55,6 @@ class Cave():
                 dist = chiton.distance + neighbor.risk
                 if dist < neighbor.distance:
                     neighbor.distance = dist
-                    neighbor.parent = chiton
 
 
 class Chiton():
@@ -63,7 +62,6 @@ class Chiton():
         self.x = x
         self.y = y
         self.risk = risk
-        self.parent = None
         self.distance = maximum
 
 

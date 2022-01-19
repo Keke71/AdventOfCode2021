@@ -1,10 +1,8 @@
 from helpers.problemrunner import run_problem
-import sys
 
 
 @run_problem
 def run():
-    sys.setrecursionlimit(10000)
     with open("Problem0030.txt") as f:
         folded_matrix = list([int(x) for x in textLine.strip()] for textLine in f)
     height = len(folded_matrix)
@@ -24,30 +22,47 @@ class Cave():
         self.width = len(matrix[0])
         self.height = len(matrix)
         self.maximum_sum = (self.width + self.height) * 9
-        self.matrix = [[Chiton(matrix[y][x]) for x in range(self.width)] * self.width for y in range(self.height)]
-        
-        return self.get_minimum_risk_above(self.width - 1, self.height - 1)
+        self.matrix = [[Chiton(x, y, matrix[y][x], self.maximum_sum) for x in range(self.width)] for y in range(self.height)]
+        self.matrix[0][0].distance = 0
+        self.open_list = set([self.matrix[0][0]])
+        self.closed_list = set()
 
+        while len(self.open_list) > 0:
+            q = sorted(self.open_list, key=lambda x: x.distance)[0]
+            self.open_list.remove(q)
+            self.closed_list.add(q)
+            self.add_to_open_list(q.x + 1, q.y)
+            self.add_to_open_list(q.x, q.y + 1)
+            self.add_to_open_list(q.x - 1, q.y)
+            self.add_to_open_list(q.x, q.y - 1)
+            self.update_distance(q, q.x + 1, q.y)
+            self.update_distance(q, q.x, q.y + 1)
+            self.update_distance(q, q.x - 1, q.y)
+            self.update_distance(q, q.x, q.y - 1)
 
-    def get_minimum_risk_above(self, x, y):
-        if x == 0 and y == 0:
-            return 0
+        return self.matrix[self.height - 1][self.width - 1].distance
+    
+    def add_to_open_list(self, x, y):
+        if 0 <= x < self.width and 0 <= y < self.height:
+            chiton = self.matrix[y][x]
+            if chiton not in self.open_list and chiton not in self.closed_list:
+                self.open_list.add(chiton)
 
-        chiton = self.matrix[y][x]
-        if chiton.minimum_risk_above != 0:
-            return chiton.minimum_risk_above
-
-        risk_left = self.get_minimum_risk_above(x - 1, y) if x > 0 else self.maximum_sum
-        risk_top = self.get_minimum_risk_above(x, y - 1) if y > 0 else self.maximum_sum
-        chiton.minimum_risk_above = chiton.risk + min(risk_left, risk_top)
-
-        return chiton.minimum_risk_above
+    def update_distance(self, chiton, x, y):
+        if 0 <= x < self.width and 0 <= y < self.height:
+            neighbor = self.matrix[y][x]
+            if neighbor in self.open_list:
+                dist = chiton.distance + neighbor.risk
+                if dist < neighbor.distance:
+                    neighbor.distance = dist
 
 
 class Chiton():
-    def __init__(self, risk):
+    def __init__(self, x, y, risk, maximum):
+        self.x = x
+        self.y = y
         self.risk = risk
-        self.minimum_risk_above = 0
+        self.distance = maximum
 
 
 run()

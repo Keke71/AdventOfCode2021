@@ -43,12 +43,12 @@ class Operator():
 #
 # Header: Version (3 bits) - PacketType (3 bits)
 #
-# Literal Value: {[0|1] Group} +
+# Literal Value: {[0|1] Group}+
 #
 # Group: 4 bits
 #
 #                                        / TotalLength (15 bits)       \
-# Operator Packet: LengthType (1 bit) ->                                 ->  {Packet} +
+# Operator Packet: LengthType (1 bit) ->                                 ->  {Packet}+
 #                                        \ Number of packets (11 bits) /
 class TransmissionParser():
     operators = [
@@ -61,6 +61,7 @@ class TransmissionParser():
         Operator.less_than,
         Operator.equal_to
     ]
+    
 
     def parse(self, hexCode):
         # Leading zeros are completely ignored
@@ -75,10 +76,7 @@ class TransmissionParser():
 
     def packet(self):
         _, packet_type = self.header()
-        if packet_type == PacketType.LITERAL:
-            return self.literal_value()
-        else:
-            return self.operator_packet(packet_type)
+        return self.literal_value() if packet_type == PacketType.LITERAL else self.operator_packet(packet_type)
 
 
     def header(self):
@@ -117,11 +115,11 @@ class TransmissionParser():
         if self.length_type_id() == LengthType.TOTALLENGTH:
             # length is stored in a 15-bit value
             length = self.to_int(self.read_bits(15))
-            return self.read_total_length_packets(length, operator)
+            return self.read_packets_by_total_length(length, operator)
         else:
             # number of packets is stored in an 11-bit value
             count = self.to_int(self.read_bits(11))
-            return self.read_number_of_packets(count, operator)
+            return self.read_packets_by_number(count, operator)
 
 
     def length_type_id(self):
@@ -129,7 +127,7 @@ class TransmissionParser():
         return LengthType(self.to_int(self.read_bits(1)))
 
 
-    def read_total_length_packets(self, length, operator):
+    def read_packets_by_total_length(self, length, operator):
         current_position = self.position
         values = []
         while self.position - current_position < length:
@@ -140,7 +138,7 @@ class TransmissionParser():
         return operator(values)
 
 
-    def read_number_of_packets(self, count, operator):
+    def read_packets_by_number(self, count, operator):
         values = []
         for _ in range(count):
             # read subpackages and collect their results

@@ -5,8 +5,7 @@ from math import sqrt, ceil
 @run_problem
 def run():
     with open("Problem0034.txt") as f:
-        target_area = list(line.rstrip() for line in f)[0]
-        target_area = target_area.lstrip('target area: x=')
+        target_area = f.readline().lstrip('target area: x=')
         points = target_area.split(', y=')
         x_coords = points[0].split('..')
         y_coords = points[1].split('..')
@@ -16,7 +15,7 @@ def run():
         # Sum of all x steps must be at least target.left
         # x0_min*(x0_min + 1) / 2 >= target.left
         x0_min = ceil((-1 + sqrt(1 + 8 * target.left)) / 2)
-        # Every x0 above half distance to the right edge or the target will run beyond target in the second step
+        # Every x0 above half distance to the right edge of the target will run beyond target in the second step
         x0_max = ceil(target.right / 2)
 
         count = 0
@@ -26,6 +25,7 @@ def run():
                 if shot.hits_target():
                     count += 1
 
+        # Direct shots on target were not considered yet
         count += target.size()
 
         return count

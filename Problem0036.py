@@ -4,14 +4,17 @@ from math import floor, ceil
 
 @run_problem
 def run():
-    with open("Problem0035.txt") as f:
+    with open("Problem0036.txt") as f:
         numbers = list(line.rstrip() for line in f)
-        sum = SnailfishNumber(numbers[0])
-        for i in range(1, len(numbers)):
-            sum.add(SnailfishNumber(numbers[i]))
-        sum.print()
-        
-        return sum.magnitude()
+        max_magnitude = 0
+        for i in range(len(numbers)):
+            for n in numbers[:i] + numbers[i+1:]:
+                first = SnailfishNumber(numbers[i])
+                second = SnailfishNumber(n)
+                first.add(second)
+                max_magnitude = max(max_magnitude, first.magnitude())
+                
+        return max_magnitude
 
 
 class SnailfishNumber():
